@@ -9,17 +9,7 @@ import argparse as agp
 ### Further implementations :
 # parse and using json too
 
-        
-def error(strerr):
-    print(strerr)
-    exit(-1)
-    
-priv_addr = ["0.0.0.0", "::"]
-private_range = [["10.0.0.0", "10.255.255.255"],
-                 ["172.16.0.0", "172.31.255.255"],
-                 ["192.168.0.0", "192.168.255.255"]]
-
-## Filters
+### Filters
 # --remote
 # --local
 # --tcp_con < LISTENING | ESTABLISHED | CLOSED | CLOSE_WAIT >
@@ -27,14 +17,10 @@ private_range = [["10.0.0.0", "10.255.255.255"],
 # --ip <ADDR>
 # --pid <SOMETHING>
 # --service_name=
-
-# --uncentered
-
-def atoi(string : str) -> int:
-    return int(string, base=10)
-
-def itoa(num : int) -> str:
-    return str(num)
+        
+def error(strerr):
+    print(strerr)
+    exit(-1)
 
 def find_local_addr(df : pd.DataFrame):
     local_addr = df["LocalAddr"]
@@ -58,8 +44,7 @@ def get_local_conn(df : pd.DataFrame):
     return nx.from_pandas_edgelist(local_df, source='LocalPort', target='ForeignPort')
 
 def get_private_conn(df : pd.DataFrame, addr:list):
-    print(addr)
-    priv_df = df[df["ForeignAddr"].isin(addr)]
+    priv_df = df[(df["ForeignAddr"].isin(addr)) & (df["State"] != 'LISTENING')]
     graph_local = nx.from_pandas_edgelist(priv_df, source='LocalAddr', target='LocalPort')
     graph_port = nx.from_pandas_edgelist(priv_df, source='LocalPort', target='ForeignPort')
     graph_remote = nx.from_pandas_edgelist(priv_df, source='ForeignAddr', target='ForeignPort')
@@ -96,10 +81,3 @@ if __name__ == '__main__':
     G = nx.compose_all([graph_local,graph_priv, graph_remote])
     nx.draw_networkx(G, with_labels=True)
     plt.show()
-
-    # graph = nx.from_pandas_edgelist(net_df, source=source_ep, target=target_ep, edge_attr=lst_edge_attr)
-    # graph = nx.contracted_nodes(graph, "0.0.0.0", "::")
-    # # Contract same nodes on local network
-    
-    # nx.draw_networkx(graph, with_labels=True)
-    # plt.show()
